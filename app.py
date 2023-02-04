@@ -53,7 +53,7 @@ async def on_message(message):
     if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
-    if  "quoi" in message.content.lower():
+    if  "quoi" in message.content.lower() and message.author.id != client.user.id:
         await message.channel.send("Feur", reference=message)
 
 
