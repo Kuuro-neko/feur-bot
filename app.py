@@ -36,6 +36,33 @@ def feur_add_count(user_id, guild_id):
     with open("data/data.json", "w") as f:
         json.dump(data, f)
 
+#Command to config the bot (only for administators). Slash commands that takes a feur bool and a allo bool
+"""
+@tree.command(name = "config")
+async def config(interaction, feur: bool = True, allo: bool = True):
+    Configure le bot
+
+    Parameters
+    -----------
+    feur: bool
+        Si le bot doit répondre à "feur" (par défaut, True)
+    
+    allo: bool
+        Si le bot doit répondre à "allo" (par défaut, True)
+    
+    if interaction.user.guild_permissions.administrator:
+        try:
+            with open("data/config.json", "r") as f:
+                data = json.load(f)
+        except:
+            data = {}
+        data[str(interaction.guild_id)] = {"feur": feur, "allo": allo}
+        with open("data/config.json", "w") as f:
+            json.dump(data, f)
+        await interaction.response.send_message("Configuration enregistrée")
+    else:
+        await interaction.response.send_message("Vous n'avez pas la permission d'utiliser cette commande")
+"""
 @tree.command(name = "nbfeur")
 async def nbfeur(interaction, user: discord.User = None):
     """Affiche le nombre de fois que quelqu'un s'est fait "Feur"
@@ -110,19 +137,21 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
+    if message.author.bot:
+        return
     new_line = f"{message.created_at.strftime('%m/%d/%Y, %H:%M')} - {message.author}: {message.content}"
     message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
     if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
-    if QUOI_PHONETIQUE in message_phonetique and not message.author.bot:
+    if QUOI_PHONETIQUE in message_phonetique:
         try:
             feur_add_count(message.author.id, message.guild.id)
         except:
             pass
         await message.add_reaction("<:feur:1071522848159567944>")
     
-    if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique) and not message.author.bot:
+    if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique):
         await message.add_reaction("<:al:1071535087885234196>")
         await message.add_reaction("<:huile:1071533394585985196>")
 
