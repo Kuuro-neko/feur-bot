@@ -13,6 +13,7 @@ tree = app_commands.CommandTree(client)
 QUOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("quoi")
 ALLO_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo")
 ALLO_QUESTION_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo ?")[:3]
+ALLOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("alloi")[:3]
 
 def get_file_extension(filename):
     return filename.split(".")[-1]
@@ -22,7 +23,7 @@ def replace_special_chars_memegen(string):
 
 def feur_add_count(user_id, guild_id):
     try:
-        with open("data.json", "r") as f:
+        with open("data/data.json", "r") as f:
             data = json.load(f)
     except:
         data = {}
@@ -32,7 +33,7 @@ def feur_add_count(user_id, guild_id):
         data[str(guild_id)][str(user_id)] += 1
     else:
         data[str(guild_id)][str(user_id)] = 1
-    with open("data.json", "w") as f:
+    with open("data/data.json", "w") as f:
         json.dump(data, f)
 
 @tree.command(name = "nbfeur")
@@ -48,7 +49,7 @@ async def nbfeur(interaction, user: discord.User = None):
         user = interaction.user
     guild = interaction.guild_id
     try:
-        with open("data.json", "r") as f:
+        with open("data/data.json", "r") as f:
             data = json.load(f)
     except:
         data = {}
@@ -62,7 +63,7 @@ async def rankfeur(interaction):
     """Affiche le classement des personnes qui se sont fait "Feur" le plus de fois"""
     guild = interaction.guild_id
     try:
-        with open("data.json", "r") as f:
+        with open("data/data.json", "r") as f:
             data = json.load(f)
     except:
         data = {}
@@ -121,7 +122,7 @@ async def on_message(message):
             pass
         await message.add_reaction("<:feur:1071522848159567944>")
     
-    if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique) and not message.author.bot:
+    if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique) and not message.author.bot:
         await message.add_reaction("<:al:1071535087885234196>")
         await message.add_reaction("<:huile:1071533394585985196>")
 

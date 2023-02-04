@@ -1,3 +1,5 @@
 .env
 chat.txt
-data.json
+test.py
+data/data.json
+data/config.json
