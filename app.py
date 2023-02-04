@@ -16,16 +16,18 @@ def get_file_extension(filename):
 def replace_special_chars_memegen(string):
     return string.replace("-", "--").replace("_", "__").replace(" ", "_").replace("?", "~q").replace("&", "~a").replace("%", "~p").replace("#", "~h").replace("/", "~s").replace("\"", "''").replace("<", "~l").replace(">", "~g")
 
-def feur_add_count(id):
+def feur_add_count(user_id, guild_id):
     try:
         with open("data.json", "r") as f:
             data = json.load(f)
     except:
         data = {}
-    if id in data:
-        data[id] += 1
+    if str(guild_id) not in data:
+        data[str(guild_id)] = {}
+    if str(user_id) in data[str(guild_id)]:
+        data[str(guild_id)][str(user_id)] += 1
     else:
-        data[id] = 1
+        data[str(guild_id)][str(user_id)] = 1
     with open("data.json", "w") as f:
         json.dump(data, f)
 
@@ -39,29 +41,35 @@ async def nbfeur(interaction, user: discord.User = None):
         L'utilisateur à qui afficher le nombre de fois qu'il a dit "Feur" (par défaut, l'auteur de la commande)
     """
     if user == None:
-        user = interaction.author
+        user = interaction.user
+    guild = interaction.guild_id
     try:
         with open("data.json", "r") as f:
             data = json.load(f)
     except:
         data = {}
-    if str(user.id) in data:
-        await interaction.response.send_message(f"{user} a dit \"Feur\" {data[str(user.id)]} fois")
-    else:
-        await interaction.response.send_message(f"{user} n'a jamais dit \"Feur\"")
+    if str(guild) not in data:
+        data[str(guild)] = {}
+    if str(user.id) in data[str(guild)]:
+        await interaction.response.send_message(f"{user.name} a dit \"Feur\" **{data[str(guild)][str(user.id)]}** fois")
 
 @tree.command(name = "rankfeur")
 async def rankfeur(interaction):
     """Affiche le classement des personnes qui ont dit "Feur" le plus de fois"""
+    guild = interaction.guild_id
     try:
         with open("data.json", "r") as f:
             data = json.load(f)
     except:
         data = {}
-    data = sorted(data.items(), key=lambda x: x[1], reverse=True)
-    message = ""
-    for i in range(len(data)):
-        message += f"{i+1}. **{client.get_user(int(data[i][0])).name}** : **{data[i][1]}** fois\n"
+    if str(guild) not in data:
+        data[str(guild)] = {}
+    data = data[str(guild)]
+    data = {k: v for k, v in sorted(data.items(), key=lambda item: item[1], reverse=True)}
+    message = "Classement des personnes qui ont dit \"Feur\" le plus de fois:\n\n"
+    for i, (user_id, count) in enumerate(data.items()):
+        user = await client.fetch_user(user_id)
+        message += f"{i+1}. {user.name} - {count} fois\n"
     await interaction.response.send_message(message)
 
 @tree.command(name = "memegen")
@@ -92,7 +100,7 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
 
 @client.event
 async def on_ready():
-    await tree.sync()
+    await tree.sync(guild=discord.Object(id=1028047338368933920))
     print(f'{client.user} has connected to Discord!')
 
 @client.event
@@ -103,7 +111,7 @@ async def on_message(message):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
     if "quoi" in message.content.lower() and not message.author.bot:
-        feur_add_count(message.author.id)
+        feur_add_count(message.author.id, message.guild.id)
         await message.channel.send("Feur", reference=message)
 
 client.run(TOKEN)
