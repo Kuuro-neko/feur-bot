@@ -112,6 +112,9 @@ async def on_message(message):
             f.write(new_line + "\n")
     if "quoi" in message.content.lower() and not message.author.bot:
         feur_add_count(message.author.id, message.guild.id)
-        await message.channel.send("Feur", reference=message)
+        await message.add_reaction("🇫")
+        await message.add_reaction("🇪")
+        await message.add_reaction("🇺")
+        await message.add_reaction("🇷")
 
 client.run(TOKEN)
