@@ -115,7 +115,10 @@ async def on_message(message):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
     if QUOI_PHONETIQUE in message_phonetique and not message.author.bot:
-        feur_add_count(message.author.id, message.guild.id)
+        try:
+            feur_add_count(message.author.id, message.guild.id)
+        except:
+            pass
         await message.add_reaction("🇫")
         await message.add_reaction("🇪")
         await message.add_reaction("🇺")
