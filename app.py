@@ -119,9 +119,6 @@ async def on_message(message):
             feur_add_count(message.author.id, message.guild.id)
         except:
             pass
-        await message.add_reaction("🇫")
-        await message.add_reaction("🇪")
-        await message.add_reaction("🇺")
-        await message.add_reaction("🇷")
+        await message.add_reaction("<:feur:1071522848159567944>")
 
 client.run(TOKEN)
