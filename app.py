@@ -111,7 +111,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     new_line = f"{message.created_at.strftime('%m/%d/%Y, %H:%M')} - {message.author}: {message.content}"
-    message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower())
+    message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
     if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
