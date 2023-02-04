@@ -16,7 +16,7 @@ def replace_special_chars_memegen(string):
     return string.replace("-", "--").replace("_", "__").replace(" ", "_").replace("?", "~q").replace("&", "~a").replace("%", "~p").replace("#", "~h").replace("/", "~s").replace("\"", "''").replace("<", "~l").replace(">", "~g")
 
 @tree.command(name = "memegen")
-async def memegen(interaction, image: str="", top: str="", bottom: str=""):
+async def memegen(interaction, image: str, top: str="", bottom: str=""):
     """Génère un meme avec le texte en haut et en bas
 
     Parameters
