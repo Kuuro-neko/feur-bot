@@ -2,6 +2,7 @@
 import os
 import json
 import discord
+import epitran
 from discord import app_commands
 from dotenv import load_dotenv
 
@@ -9,6 +10,7 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client(intents=discord.Intents(message_content=True, messages=True, members=True))
 tree = app_commands.CommandTree(client)
+QUOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("quoi")
 
 def get_file_extension(filename):
     return filename.split(".")[-1]
@@ -106,11 +108,13 @@ async def on_ready():
 @client.event
 async def on_message(message):
     new_line = f"{message.created_at.strftime('%m/%d/%Y, %H:%M')} - {message.author}: {message.content}"
+   
+    message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower())
     print(new_line)
     if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
-    if "quoi" in message.content.lower() and not message.author.bot:
+    if QUOI_PHONETIQUE in message_phonetique and not message.author.bot:
         feur_add_count(message.author.id, message.guild.id)
         await message.add_reaction("🇫")
         await message.add_reaction("🇪")
