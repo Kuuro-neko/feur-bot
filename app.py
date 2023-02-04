@@ -92,7 +92,7 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=344844965765054465))
+    await tree.sync()
     print(f'{client.user} has connected to Discord!')
 
 @client.event
