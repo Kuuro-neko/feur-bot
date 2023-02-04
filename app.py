@@ -51,7 +51,7 @@ async def nbfeur(interaction, user: discord.User = None):
     if str(guild) not in data:
         data[str(guild)] = {}
     if str(user.id) in data[str(guild)]:
-        await interaction.response.send_message(f"{user.name} a dit \"Feur\" **{data[str(guild)][str(user.id)]}** fois")
+        await interaction.response.send_message(f"{user.name} s'est fait \"Feur\" **{data[str(guild)][str(user.id)]}** fois")
 
 @tree.command(name = "rankfeur")
 async def rankfeur(interaction):
