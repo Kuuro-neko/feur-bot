@@ -11,6 +11,8 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client(intents=discord.Intents(message_content=True, messages=True, members=True))
 tree = app_commands.CommandTree(client)
 QUOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("quoi")
+ALLO_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo")
+ALLO_QUESTION_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo ?")[:3]
 
 def get_file_extension(filename):
     return filename.split(".")[-1]
@@ -108,9 +110,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     new_line = f"{message.created_at.strftime('%m/%d/%Y, %H:%M')} - {message.author}: {message.content}"
-   
     message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower())
-    print(new_line)
     if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
@@ -120,5 +120,9 @@ async def on_message(message):
         except:
             pass
         await message.add_reaction("<:feur:1071522848159567944>")
+    
+    if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique) and not message.author.bot:
+        await message.add_reaction("<:al:1071535087885234196>")
+        await message.add_reaction("<:huile:1071533394585985196>")
 
 client.run(TOKEN)
