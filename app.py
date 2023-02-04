@@ -33,12 +33,12 @@ def feur_add_count(user_id, guild_id):
 
 @tree.command(name = "nbfeur")
 async def nbfeur(interaction, user: discord.User = None):
-    """Affiche le nombre de fois que quelqu'un a dit "Feur"
+    """Affiche le nombre de fois que quelqu'un s'est fait "Feur"
 
     Parameters
     -----------
     user: discord.User
-        L'utilisateur à qui afficher le nombre de fois qu'il a dit "Feur" (par défaut, l'auteur de la commande)
+        L'utilisateur à qui afficher le nombre de fois qu'il s'est fait "Feur" (par défaut, l'auteur de la commande)
     """
     if user == None:
         user = interaction.user
@@ -55,7 +55,7 @@ async def nbfeur(interaction, user: discord.User = None):
 
 @tree.command(name = "rankfeur")
 async def rankfeur(interaction):
-    """Affiche le classement des personnes qui ont dit "Feur" le plus de fois"""
+    """Affiche le classement des personnes qui se sont fait "Feur" le plus de fois"""
     guild = interaction.guild_id
     try:
         with open("data.json", "r") as f:
@@ -66,7 +66,7 @@ async def rankfeur(interaction):
         data[str(guild)] = {}
     data = data[str(guild)]
     data = {k: v for k, v in sorted(data.items(), key=lambda item: item[1], reverse=True)}
-    message = "Classement des personnes qui ont dit \"Feur\" le plus de fois:\n\n"
+    message = f"Classement des personnes qui se sont fait \"Feur\" le plus de fois par <@{client.user.id}>:\n\n"
     for i, (user_id, count) in enumerate(data.items()):
         user = await client.fetch_user(user_id)
         message += f"{i+1}. {user.name} - {count} fois\n"
@@ -100,7 +100,7 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id=1028047338368933920))
+    await tree.sync()
     print(f'{client.user} has connected to Discord!')
 
 @client.event
