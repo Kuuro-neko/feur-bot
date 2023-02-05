@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-client = discord.Client(intents=discord.Intents(message_content=True, messages=True, members=True))
+client = discord.Client(intents=discord.Intents().all())
 tree = app_commands.CommandTree(client)
 QUOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("quoi")
 ALLO_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo")
@@ -133,6 +133,7 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
 @client.event
 async def on_ready():
     await tree.sync()
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
     print(f'{client.user} has connected to Discord!')
 
 @client.event
