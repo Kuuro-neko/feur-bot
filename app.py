@@ -11,6 +11,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client(intents=discord.Intents().all())
 tree = app_commands.CommandTree(client)
 QUOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("quoi")
+KOA_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("koa")
 ALLO_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo")
 ALLO_QUESTION_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo ?")[:3]
 ALLOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("alloi")[:3]
@@ -145,7 +146,7 @@ async def on_message(message):
     if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
         with open("chat.txt", "a") as f:
             f.write(new_line + "\n")
-    if QUOI_PHONETIQUE in message_phonetique:
+    if (QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique):
         try:
             feur_add_count(message.author.id, message.guild.id)
         except:
