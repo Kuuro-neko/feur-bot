@@ -10,11 +10,16 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 client = discord.Client(intents=discord.Intents().all())
 tree = app_commands.CommandTree(client)
+
 QUOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("quoi")
 KOA_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("koa")
 ALLO_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo")
 ALLO_QUESTION_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("allo ?")[:3]
 ALLOI_PHONETIQUE = epitran.Epitran("fra-Latn").transliterate("alloi")[:3]
+
+FEUR = "<:feur:1071522848159567944>"
+AL = "<:al:1071535087885234196>"
+HUILE = "<:huile:1071533394585985196>"
 
 def get_file_extension(filename):
     return filename.split(".")[-1]
@@ -64,6 +69,7 @@ async def config(interaction, feur: bool = True, allo: bool = True):
     else:
         await interaction.response.send_message("Vous n'avez pas la permission d'utiliser cette commande")
 """
+
 @tree.command(name = "nbfeur")
 async def nbfeur(interaction, user: discord.User = None):
     """Affiche le nombre de fois que quelqu'un s'est fait "Feur"
@@ -99,11 +105,11 @@ async def rankfeur(interaction):
         data[str(guild)] = {}
     data = data[str(guild)]
     data = {k: v for k, v in sorted(data.items(), key=lambda item: item[1], reverse=True)}
-    message = f"Classement des personnes qui se sont fait \"Feur\" le plus de fois par <@{client.user.id}>:\n\n"
+    embed = discord.Embed(title = f"Classement des personnes qui se sont fait {FEUR} le plus de fois", color = 0xABB5BF)
     for i, (user_id, count) in enumerate(data.items()):
         user = await client.fetch_user(user_id)
-        message += f"{i+1}. {user.name} - {count} fois\n"
-    await interaction.response.send_message(message)
+        embed.add_field(name = "", value = f"{i+1}. **{user.name}** - {count} fois", inline = False)
+    await interaction.response.send_message(embed = embed)
 
 @tree.command(name = "memegen")
 async def memegen(interaction, image: str, top: str="", bottom: str=""):
@@ -151,10 +157,10 @@ async def on_message(message):
             feur_add_count(message.author.id, message.guild.id)
         except:
             pass
-        await message.add_reaction("<:feur:1071522848159567944>")
+        await message.add_reaction(FEUR)
     
     if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique):
-        await message.add_reaction("<:al:1071535087885234196>")
-        await message.add_reaction("<:huile:1071533394585985196>")
+        await message.add_reaction(AL)
+        await message.add_reaction(HUILE)
 
 client.run(TOKEN)
