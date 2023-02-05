@@ -138,6 +138,10 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
     await interaction.response.send_message(f"https://api.memegen.link/images/custom/{top}/{bottom}.{ext}?background={image}")
 
 @client.event
+async def on_guild_join(guild):
+    await tree.sync(guild=guild)
+
+@client.event
 async def on_ready():
     await tree.sync()
     await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
