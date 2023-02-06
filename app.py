@@ -81,6 +81,9 @@ async def nbfeur(interaction, user: discord.User = None):
     """
     if user == None:
         user = interaction.user
+    if user.bot:
+        await interaction.response.send_message(f"Les bots ne peuvent pas se faire {FEUR}", ephemeral=True)
+        return
     guild = interaction.guild_id
     try:
         with open("data/data.json", "r") as f:
@@ -90,7 +93,9 @@ async def nbfeur(interaction, user: discord.User = None):
     if str(guild) not in data:
         data[str(guild)] = {}
     if str(user.id) in data[str(guild)]:
-        await interaction.response.send_message(f"{user.name} s'est fait \"Feur\" **{data[str(guild)][str(user.id)]}** fois")
+        await interaction.response.send_message(f"{user.name} s'est fait {FEUR} **{data[str(guild)][str(user.id)]}** fois")
+    else:
+        await interaction.response.send_message(f"{user.name} n'a jamais été {FEUR}")
 
 @tree.command(name = "rankfeur")
 async def rankfeur(interaction):
@@ -131,7 +136,7 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
         return
     ext = get_file_extension(image)
     if ext not in ["jpg", "jpeg", "png", "gif"]:
-        await interaction.response.send_message("L'image doit être un jpg, un png ou un gif")
+        await interaction.response.send_message("L'image doit être un jpg, un png ou un gif", ephemeral=True)
         return
     top = replace_special_chars_memegen(top)
     bottom = replace_special_chars_memegen(bottom)
