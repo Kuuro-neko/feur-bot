@@ -151,11 +151,7 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
-    new_line = f"{message.created_at.strftime('%m/%d/%Y, %H:%M')} - {message.author}: {message.content}"
     message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
-    if str(message.channel.id) in os.getenv("CHANNELS_TO_LOG"):
-        with open("chat.txt", "a") as f:
-            f.write(new_line + "\n")
     if (QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique):
         try:
             feur_add_count(message.author.id, message.guild.id)
