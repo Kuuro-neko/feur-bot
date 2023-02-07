@@ -163,8 +163,13 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author.bot or message.content[0] == "$":
+    if message.author.bot:
         return
+    try:
+        if message.content[0] == "$":
+            return
+    except:
+        pass
     message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
     if (QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique):
         try:
