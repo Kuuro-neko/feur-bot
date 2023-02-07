@@ -21,6 +21,8 @@ FEUR = "<:feur:1071522848159567944>"
 AL = "<:al:1071535087885234196>"
 HUILE = "<:huile:1071533394585985196>"
 
+bocchi = client.get_sticker(1072588455466520706)
+
 def get_file_extension(filename):
     return filename.split(".")[-1]
 
@@ -129,14 +131,14 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
         Texte à afficher en bas de l'image
 
     image: str
-        Lien vers l'image à utiliser
+        Lien vers l'image à utiliser. Le lien doit se terminer par : .png | .jpg | .jpeg | .gif
     """
     if image == None:
         await interaction.response.send_message("Il faut mettre une image")
         return
     ext = get_file_extension(image)
     if ext not in ["jpg", "jpeg", "png", "gif"]:
-        await interaction.response.send_message("L'image doit être un jpg, un png ou un gif", ephemeral=True)
+        await interaction.response.send_message("Le lien de l'image doit se terminer par : .png | .jpg | .jpeg | .gif", ephemeral=True)
         return
     top = replace_special_chars_memegen(top)
     bottom = replace_special_chars_memegen(bottom)
@@ -148,13 +150,20 @@ async def on_guild_join(guild):
 
 @client.event
 async def on_ready():
-    await tree.sync()
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
-    print(f'{client.user} has connected to Discord!')
+    PRODUCTION = bool(int(os.getenv('PRODUCTION')))
+    if PRODUCTION:
+        status = "production"
+        await tree.sync()
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
+    else:
+        status = "développement"
+        await tree.sync(guild=discord.Object(id=1071519891196223528))
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="kwa ?"))
+    print(f'{client.user} has connected to Discord! ({status})')
 
 @client.event
 async def on_message(message):
-    if message.author.bot:
+    if message.author.bot or message.content[0] == "$":
         return
     message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
     if (QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique):
