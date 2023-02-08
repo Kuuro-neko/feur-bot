@@ -8,9 +8,9 @@ Un bot qui réagit aux utilisateurs de Discord qui ont le malheur de dire "Quoi"
 
 ### Réactions
 
-- Réagit avec une émote ![feur]('emotes/feur.png') quand un utilisateur dit "Quoi" dans un salon écrit.
+- Réagit avec une émote <img src="emotes/feur.png" width="30" height="30"/> quand un utilisateur dit "Quoi" dans un salon écrit.
 
-- Réagit avec les émotes ![al]('emotes/al.png') ![huile]('emotes/huile.png') quand un utilisateur dit "Allo" dans un salon écrit.
+- Réagit avec les émotes <img src="emotes/al.png" width="30" height="30"/> <img src="emotes/huile.png" width="30" height="30"/> quand un utilisateur dit "Allo" dans un salon écrit.
 
 ### Commandes
 
