@@ -12,7 +12,7 @@ Un bot qui réagit aux utilisateurs de Discord qui ont le malheur de dire "Quoi"
 
 - Réagit avec les émotes <img src="emotes/al.png" width="30" height="30"/> <img src="emotes/huile.png" width="30" height="30"/> quand un utilisateur dit "Allo" dans un salon écrit.
 
-La reconnaissance des mots interdits est basée sur [epitran](https://pypi.org/project/epitran/), une bibliothèque permettant de convertir du texte en sa prononciation dans de nombreuses langues
+La reconnaissance des mots interdits est basée sur [epitran](https://pypi.org/project/epitran/), une bibliothèque permettant de convertir du texte en sa prononciation dans de nombreuses langues pour quand même piéger les potits malins qui écrivent "kwa" ou bien "à l'eau".
 
 ### Commandes
 
