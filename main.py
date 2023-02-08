@@ -177,12 +177,11 @@ async def on_message(message):
         pass
     message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
     if (QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique):
+        await message.add_reaction(FEUR)
         try:
             feur_add_count(message.author.id, message.guild.id)
         except:
             pass
-        await message.add_reaction(FEUR)
-    
     if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique):
         await message.add_reaction(AL)
         await message.add_reaction(HUILE)
