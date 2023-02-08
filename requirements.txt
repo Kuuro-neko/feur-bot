@@ -1,2 +1,3 @@
-discord.py
 epitran
+discord.py
+python-dotenv
