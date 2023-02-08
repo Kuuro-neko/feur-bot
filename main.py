@@ -1,6 +1,6 @@
 # bot.py
 import os
-import json
+import requests
 import discord
 import epitran
 from discord import app_commands
@@ -21,6 +21,26 @@ FEUR = "<:feur:1071522848159567944>"
 AL = "<:al:1071535087885234196>"
 HUILE = "<:huile:1071533394585985196>"
 
+JSONBIN_ID = os.getenv("JSONBIN_ID")
+JSONBIN_KEY = os.getenv("JSONBIN_KEY")
+
+def get_data():
+    # get data from jsonbin
+    # Read data from jsonbin.io
+    response = requests.get("https://api.jsonbin.io/v3/b/" + JSONBIN_ID + "/latest", json=None, headers={
+        "X-Access-Key": JSONBIN_KEY,
+        "X-Bin-Meta": "false"
+    })
+
+    return response.json()
+
+def write_data(data):
+    # Write data to jsonbin.io
+    response = requests.put("https://api.jsonbin.io/v3/b/" + JSONBIN_ID, json=data, headers={
+        "Content-Type": "application/json",
+        "X-Access-Key": JSONBIN_KEY
+    })
+
 def get_file_extension(filename):
     return filename.split(".")[-1]
 
@@ -28,19 +48,14 @@ def replace_special_chars_memegen(string):
     return string.replace("-", "--").replace("_", "__").replace(" ", "_").replace("?", "~q").replace("&", "~a").replace("%", "~p").replace("#", "~h").replace("/", "~s").replace("\"", "''").replace("<", "~l").replace(">", "~g")
 
 def feur_add_count(user_id, guild_id):
-    try:
-        with open("data/data.json", "r") as f:
-            data = json.load(f)
-    except:
-        data = {}
+    data = get_data()
     if str(guild_id) not in data:
         data[str(guild_id)] = {}
     if str(user_id) in data[str(guild_id)]:
         data[str(guild_id)][str(user_id)] += 1
     else:
         data[str(guild_id)][str(user_id)] = 1
-    with open("data/data.json", "w") as f:
-        json.dump(data, f)
+    write_data(data)
 
 #Command to config the bot (only for administators). Slash commands that takes a feur bool and a allo bool
 """
@@ -85,11 +100,7 @@ async def nbfeur(interaction, user: discord.User = None):
         await interaction.response.send_message(f"Les bots ne peuvent pas se faire {FEUR}", ephemeral=True)
         return
     guild = interaction.guild_id
-    try:
-        with open("data/data.json", "r") as f:
-            data = json.load(f)
-    except:
-        data = {}
+    data = get_data()
     if str(guild) not in data:
         data[str(guild)] = {}
     if str(user.id) in data[str(guild)]:
@@ -101,11 +112,7 @@ async def nbfeur(interaction, user: discord.User = None):
 async def rankfeur(interaction):
     """Affiche le classement des personnes qui se sont fait "Feur" le plus de fois"""
     guild = interaction.guild_id
-    try:
-        with open("data/data.json", "r") as f:
-            data = json.load(f)
-    except:
-        data = {}
+    data = get_data()
     if str(guild) not in data:
         data[str(guild)] = {}
     data = data[str(guild)]
