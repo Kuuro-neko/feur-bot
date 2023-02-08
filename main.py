@@ -21,8 +21,6 @@ FEUR = "<:feur:1071522848159567944>"
 AL = "<:al:1071535087885234196>"
 HUILE = "<:huile:1071533394585985196>"
 
-bocchi = client.get_sticker(1072588455466520706)
-
 def get_file_extension(filename):
     return filename.split(".")[-1]
 
