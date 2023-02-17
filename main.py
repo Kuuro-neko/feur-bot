@@ -44,7 +44,7 @@ def write_data(data):
 def to_phonetique(message):
     # Ignorer URL et "alors" (un peu relou de répondre à l'huile à alors)
     message = message.lower()
-    message = " ".join([word for word in message.split() if not word.startswith("http") and word != "alors"])
+    message = " ".join([word for word in message.split() if (not word.startswith("http") and not word.startswith("alors") and not word.startswith("www."))])
     return epitran.Epitran("fra-Latn").transliterate(message)
 
 def quoi_in_phonetique(message_phonetique):
