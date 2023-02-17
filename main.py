@@ -41,6 +41,18 @@ def write_data(data):
         "X-Access-Key": JSONBIN_KEY
     })
 
+def to_phonetique(message):
+    # Ignorer URL et "alors" (un peu relou de répondre à l'huile à alors)
+    message = message.lower()
+    message = " ".join([word for word in message.split() if not word.startswith("http") and word != "alors"])
+    return epitran.Epitran("fra-Latn").transliterate(message)
+
+def quoi_in_phonetique(message_phonetique):
+    return QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique
+
+def allo_in_phonetique(message_phonetique):
+    return ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique
+
 def get_file_extension(filename):
     return filename.split(".")[-1]
 
@@ -147,7 +159,17 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
         return
     top = replace_special_chars_memegen(top)
     bottom = replace_special_chars_memegen(bottom)
+    texte_phonetique = to_phonetique(top + " " + bottom)
+    texte_additionnel = ""
+    if quoi_in_phonetique(texte_phonetique):
+        texte_additionnel += f" {FEUR}"
+    if allo_in_phonetique(texte_phonetique):
+        texte_additionnel += f" {AL}{HUILE}"
     await interaction.response.send_message(f"https://api.memegen.link/images/custom/{top}/{bottom}.{ext}?background={image}")
+    if texte_additionnel != "":
+        channel = interaction.channel_id
+        await client.http.request(discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel), json={"content": texte_additionnel})
+    feur_add_count(interaction.user.id, interaction.guild_id)
 
 @client.event
 async def on_guild_join(guild):
@@ -171,18 +193,15 @@ async def on_message(message):
     if message.author.bot:
         return
     try:
-        if message.content[0] == "$":
+        if message.content[0] == "$": # Pour eviter de feurer les commandes Mudae
             return
     except:
         pass
-    message_phonetique = epitran.Epitran("fra-Latn").transliterate(message.content.lower()).replace(" ", "").replace("'", "")
-    if (QUOI_PHONETIQUE in message_phonetique or KOA_PHONETIQUE in message_phonetique):
+    message_phonetique = to_phonetique(message.content)
+    if quoi_in_phonetique(message_phonetique):
         await message.add_reaction(FEUR)
-        try:
-            feur_add_count(message.author.id, message.guild.id)
-        except:
-            pass
-    if (ALLO_PHONETIQUE in message_phonetique or ALLO_QUESTION_PHONETIQUE in message_phonetique or ALLOI_PHONETIQUE in message_phonetique):
+        feur_add_count(message.author.id, message.guild.id)
+    if allo_in_phonetique(message_phonetique):
         await message.add_reaction(AL)
         await message.add_reaction(HUILE)
 
