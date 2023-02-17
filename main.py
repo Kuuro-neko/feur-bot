@@ -163,13 +163,14 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
     texte_additionnel = ""
     if quoi_in_phonetique(texte_phonetique):
         texte_additionnel += f" {FEUR}"
+        feur_add_count(interaction.user.id, interaction.guild_id)
     if allo_in_phonetique(texte_phonetique):
         texte_additionnel += f" {AL}{HUILE}"
     await interaction.response.send_message(f"https://api.memegen.link/images/custom/{top}/{bottom}.{ext}?background={image}")
     if texte_additionnel != "":
         channel = interaction.channel_id
         await client.http.request(discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel), json={"content": texte_additionnel})
-    feur_add_count(interaction.user.id, interaction.guild_id)
+    
 
 @client.event
 async def on_guild_join(guild):
