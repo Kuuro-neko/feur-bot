@@ -208,7 +208,6 @@ async def on_ready():
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="maintenance en cours"))
     else:
         status = "développement"
-        #await tree.sync(guild=discord.Object(id=1071519891196223528))
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="kwa ?"))
     print(f'{client.user} has connected to Discord! ({status})')
 
@@ -238,8 +237,9 @@ async def on_message(message):
                     with open(f"data/{server}.json", "w") as f:
                         json.dump(data[server], f)
                 await message.add_reaction("✅")
-            except:
+            except Exception as e:
                 await message.add_reaction("❌")
+                await message.channel.send(e)
         if message.content == "backup_feur":
             backup_data()
             await message.add_reaction("✅")
