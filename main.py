@@ -204,8 +204,8 @@ async def on_ready():
     PRODUCTION = bool(int(os.getenv('PRODUCTION')))
     if PRODUCTION:
         status = "production"
-        #await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
-        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="maintenance en cours"))
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
+        #await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="maintenance en cours"))
     else:
         status = "développement"
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="kwa ?"))
