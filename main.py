@@ -233,9 +233,16 @@ async def on_message(message):
         if message.content == "majbdd_feur":
             try:
                 data = get_data_old()
+                # create data folder if not exists
+                if not os.path.exists("data"):
+                    os.makedirs("data")
                 for server in data:
-                    with open(f"data/{server}.json", "w") as f:
-                        json.dump(data[server], f)
+                    # create file if not exists
+                    if not os.path.exists(f"data/{server}.json"):
+                        with open(f"data/{server}.json", "w") as f:
+                            f.write("{}")
+                    for user in data[server]:
+                        write_data(server, user, data[server][user])
                 await message.add_reaction("✅")
             except Exception as e:
                 await message.add_reaction("❌")
