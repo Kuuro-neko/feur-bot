@@ -1,5 +1,4 @@
 .env
 chat.txt
 test.py
-data/data.json
-data/config.json
+data/*

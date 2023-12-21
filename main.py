@@ -3,6 +3,7 @@ import os
 import requests
 import discord
 import epitran
+import json
 from discord import app_commands
 from dotenv import load_dotenv
 
@@ -24,7 +25,10 @@ HUILE = "<:huile:1071533394585985196>"
 JSONBIN_ID = os.getenv("JSONBIN_ID")
 JSONBIN_KEY = os.getenv("JSONBIN_KEY")
 
-def get_data():
+KUURO_ID = 138729016038391808
+DEV_GUILD_ID = 1071519891196223528
+
+def get_data_old():
     # get data from jsonbin
     # Read data from jsonbin.io
     response = requests.get("https://api.jsonbin.io/v3/b/" + JSONBIN_ID + "/latest", json=None, headers={
@@ -34,12 +38,37 @@ def get_data():
 
     return response.json()
 
-def write_data(data):
-    # Write data to jsonbin.io
-    response = requests.put("https://api.jsonbin.io/v3/b/" + JSONBIN_ID, json=data, headers={
+def get_data(server_id=None, user_id=None):
+    if server_id == None:
+        data = {}
+        for filename in os.listdir("data"):
+            with open(f"data/{filename}", "r") as f:
+                data[filename.split(".")[0]] = json.load(f)
+        return data
+    else:
+        with open(f"data/{server_id}.json", "r") as f:
+            data = json.load(f)
+        if str(user_id) in data:
+            return data[str(user_id)]
+        else:
+            return 0
+
+def write_data(server_id, user_id, count):
+    with open(f"data/{server_id}.json", "r") as f:
+        data = json.load(f)
+    data[str(user_id)] = count
+    with open(f"data/{server_id}.json", "w") as f:
+        json.dump(data, f)
+
+def backup_data():
+    # Sauvegarde les données sur jsonbin
+    data = get_data()
+    headers = {
         "Content-Type": "application/json",
-        "X-Access-Key": JSONBIN_KEY
-    })
+        "X-Master-Key": JSONBIN_KEY
+    }
+    response = requests.put(f"https://api.jsonbin.io/v3/b/{JSONBIN_ID}", json=data, headers=headers)
+    print(response.text)
 
 def to_phonetique(message):
     # Ignorer URL et "alors" (un peu relou de répondre à l'huile à alors)
@@ -60,14 +89,9 @@ def replace_special_chars_memegen(string):
     return string.replace("-", "--").replace("_", "__").replace(" ", "_").replace("?", "~q").replace("&", "~a").replace("%", "~p").replace("#", "~h").replace("/", "~s").replace("\"", "''").replace("<", "~l").replace(">", "~g")
 
 def feur_add_count(user_id, guild_id):
-    data = get_data()
-    if str(guild_id) not in data:
-        data[str(guild_id)] = {}
-    if str(user_id) in data[str(guild_id)]:
-        data[str(guild_id)][str(user_id)] += 1
-    else:
-        data[str(guild_id)][str(user_id)] = 1
-    write_data(data)
+    data = get_data(guild_id, user_id)
+    data += 1
+    write_data(guild_id, user_id, data)
 
 #Command to config the bot (only for administators). Slash commands that takes a feur bool and a allo bool
 """
@@ -134,7 +158,7 @@ async def rankfeur(interaction):
         user = await client.fetch_user(user_id)
         embed.add_field(name = "", value = f"{i+1}. **{user.name}** - {count} fois", inline = False)
     await interaction.response.send_message(embed = embed)
-
+    
 @tree.command(name = "memegen")
 async def memegen(interaction, image: str, top: str="", bottom: str=""):
     """Génère un meme avec le texte en haut et en bas
@@ -170,7 +194,6 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
     if texte_additionnel != "":
         channel = interaction.channel_id
         await client.http.request(discord.http.Route('POST', '/channels/{channel_id}/messages', channel_id=channel), json={"content": texte_additionnel})
-    
 
 @client.event
 async def on_guild_join(guild):
@@ -181,11 +204,11 @@ async def on_ready():
     PRODUCTION = bool(int(os.getenv('PRODUCTION')))
     if PRODUCTION:
         status = "production"
-        await tree.sync()
-        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
+        #await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
+        await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="maintenance en cours"))
     else:
         status = "développement"
-        await tree.sync(guild=discord.Object(id=1071519891196223528))
+        #await tree.sync(guild=discord.Object(id=1071519891196223528))
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="kwa ?"))
     print(f'{client.user} has connected to Discord! ({status})')
 
@@ -193,6 +216,33 @@ async def on_ready():
 async def on_message(message):
     if message.author.bot:
         return
+    if message.author.id == KUURO_ID:
+        if message.content == "sync_feur_dev":
+            print("syncing")
+            try:
+                await tree.sync(guild=discord.Object(id=DEV_GUILD_ID))
+                await message.add_reaction("✅")
+            except:
+                await message.add_reaction("❌")  
+        if message.content == "sync_feur_all":
+            print("syncing")
+            try:
+                await tree.sync()
+                await message.add_reaction("✅")
+            except:
+                await message.add_reaction("❌") 
+        if message.content == "majbdd_feur":
+            try:
+                data = get_data_old()
+                for server in data:
+                    with open(f"data/{server}.json", "w") as f:
+                        json.dump(data[server], f)
+                await message.add_reaction("✅")
+            except:
+                await message.add_reaction("❌")
+        if message.content == "backup_feur":
+            backup_data()
+            await message.add_reaction("✅")
     try:
         if message.content[0] == "$": # Pour eviter de feurer les commandes Mudae
             return
