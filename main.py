@@ -218,22 +218,16 @@ async def on_message(message):
     if message.author.bot:
         return
     if message.author.id == KUURO_ID:
-        if message.content == "sync_feur_dev":
-            print("syncing")
-            try:
+        try:
+            if message.content == "sync_feur_dev":
+                print("syncing")
                 await tree.sync(guild=discord.Object(id=DEV_GUILD_ID))
                 await message.add_reaction("✅")
-            except:
-                await message.add_reaction("❌")  
-        if message.content == "sync_feur_all":
-            print("syncing")
-            try:
+            if message.content == "sync_feur_all":
+                print("syncing")
                 await tree.sync()
                 await message.add_reaction("✅")
-            except:
-                await message.add_reaction("❌") 
-        if message.content == "majbdd_feur":
-            try:
+            if message.content == "majbdd_feur":
                 data = get_data_old()
                 # create data folder if not exists
                 if not os.path.exists("data"):
@@ -246,12 +240,12 @@ async def on_message(message):
                     for user in data[server]:
                         write_data(server, user, data[server][user])
                 await message.add_reaction("✅")
-            except Exception as e:
-                await message.add_reaction("❌")
-                await message.channel.send(e)
-        if message.content == "backup_feur":
-            backup_data()
-            await message.add_reaction("✅")
+            if message.content == "backup_feur":
+                backup_data()
+                await message.add_reaction("✅")
+        except Exception as e:
+            await message.add_reaction("❌")
+            await message.channel.send(e)
     try:
         if message.content[0] == "$": # Pour eviter de feurer les commandes Mudae
             return
