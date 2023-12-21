@@ -48,10 +48,13 @@ def get_data(server_id=None, user_id=None):
     else:
         with open(f"data/{server_id}.json", "r") as f:
             data = json.load(f)
-        if str(user_id) in data:
-            return data[str(user_id)]
+        if user_id == None:
+            return data
         else:
-            return 0
+            if str(user_id) in data:
+                return data[str(user_id)]
+            else:
+                return 0
 
 def write_data(server_id, user_id, count):
     with open(f"data/{server_id}.json", "r") as f:
@@ -135,23 +138,22 @@ async def nbfeur(interaction, user: discord.User = None):
     if user.bot:
         await interaction.response.send_message(f"Les bots ne peuvent pas se faire {FEUR}", ephemeral=True)
         return
-    guild = interaction.guild_id
-    data = get_data()
-    if str(guild) not in data:
-        data[str(guild)] = {}
-    if str(user.id) in data[str(guild)]:
-        await interaction.response.send_message(f"{user.name} s'est fait {FEUR} **{data[str(guild)][str(user.id)]}** fois")
+    try:
+        data = get_data(interaction.guild_id)
+    except IOError:
+        data = {}
+    if str(user.id) in data:
+        await interaction.response.send_message(f"{user.name} s'est fait {FEUR} **{data[str(user.id)]}** fois")
     else:
         await interaction.response.send_message(f"{user.name} n'a jamais été {FEUR}")
 
 @tree.command(name = "rankfeur")
 async def rankfeur(interaction):
     """Affiche le classement des personnes qui se sont fait "Feur" le plus de fois"""
-    guild = interaction.guild_id
-    data = get_data()
-    if str(guild) not in data:
-        data[str(guild)] = {}
-    data = data[str(guild)]
+    try:
+        data = get_data(interaction.guild_id)
+    except IOError:
+        data = {}
     data = {k: v for k, v in sorted(data.items(), key=lambda item: item[1], reverse=True)}
     embed = discord.Embed(title = f"Classement des personnes qui se sont fait {FEUR} le plus de fois", color = 0xABB5BF)
     for i, (user_id, count) in enumerate(data.items()):
