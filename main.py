@@ -4,6 +4,7 @@ import requests
 import discord
 import epitran
 import json
+import signal
 from discord import app_commands
 from dotenv import load_dotenv
 
@@ -38,8 +39,27 @@ def get_data_old():
 
     return response.json()
 
+def replace_all_data(data):
+    # create data folder if not exists
+    if not os.path.exists("data"):
+        os.makedirs("data")
+    try:
+        for server in data:
+            # create file if not exists
+            if not os.path.exists(f"data/{server}.json"):
+                with open(f"data/{server}.json", "w") as f:
+                    f.write("{}")
+            for user in data[server]:
+                write_data(server, user, data[server][user])
+    except:
+        print("Error while replacing data")
+        for filename in os.listdir("data"):
+            os.remove(f"data/{filename}")
+        os.rmdir("data")
+        exit(1)
+
 def get_data(server_id=None, user_id=None):
-    if server_id == None:
+    if server_id is None:
         data = {}
         for filename in os.listdir("data"):
             with open(f"data/{filename}", "r") as f:
@@ -48,7 +68,7 @@ def get_data(server_id=None, user_id=None):
     else:
         with open(f"data/{server_id}.json", "r") as f:
             data = json.load(f)
-        if user_id == None:
+        if user_id is None:
             return data
         else:
             if str(user_id) in data:
@@ -68,7 +88,7 @@ def backup_data():
     data = get_data()
     headers = {
         "Content-Type": "application/json",
-        "X-Master-Key": JSONBIN_KEY
+        "X-Access-Key": JSONBIN_KEY
     }
     response = requests.put(f"https://api.jsonbin.io/v3/b/{JSONBIN_ID}", json=data, headers=headers)
     print(response.text)
@@ -96,33 +116,7 @@ def feur_add_count(user_id, guild_id):
     data += 1
     write_data(guild_id, user_id, data)
 
-#Command to config the bot (only for administators). Slash commands that takes a feur bool and a allo bool
-"""
-@tree.command(name = "config")
-async def config(interaction, feur: bool = True, allo: bool = True):
-    Configure le bot
 
-    Parameters
-    -----------
-    feur: bool
-        Si le bot doit répondre à "feur" (par défaut, True)
-    
-    allo: bool
-        Si le bot doit répondre à "allo" (par défaut, True)
-    
-    if interaction.user.guild_permissions.administrator:
-        try:
-            with open("data/config.json", "r") as f:
-                data = json.load(f)
-        except:
-            data = {}
-        data[str(interaction.guild_id)] = {"feur": feur, "allo": allo}
-        with open("data/config.json", "w") as f:
-            json.dump(data, f)
-        await interaction.response.send_message("Configuration enregistrée")
-    else:
-        await interaction.response.send_message("Vous n'avez pas la permission d'utiliser cette commande")
-"""
 
 @tree.command(name = "nbfeur")
 async def nbfeur(interaction, user: discord.User = None):
@@ -133,7 +127,7 @@ async def nbfeur(interaction, user: discord.User = None):
     user: discord.User
         L'utilisateur à qui afficher le nombre de fois qu'il s'est fait "Feur" (par défaut, l'auteur de la commande)
     """
-    if user == None:
+    if user is None:
         user = interaction.user
     if user.bot:
         await interaction.response.send_message(f"Les bots ne peuvent pas se faire {FEUR}", ephemeral=True)
@@ -155,6 +149,7 @@ async def rankfeur(interaction):
     except IOError:
         data = {}
     data = {k: v for k, v in sorted(data.items(), key=lambda item: item[1], reverse=True)}
+    
     embed = discord.Embed(title = f"Classement des personnes qui se sont fait {FEUR} le plus de fois", color = 0xABB5BF)
     for i, (user_id, count) in enumerate(data.items()):
         user = await client.fetch_user(user_id)
@@ -176,7 +171,7 @@ async def memegen(interaction, image: str, top: str="", bottom: str=""):
     image: str
         Lien vers l'image à utiliser. Le lien doit se terminer par : .png | .jpg | .jpeg | .gif
     """
-    if image == None:
+    if image is None:
         await interaction.response.send_message("Il faut mettre une image")
         return
     ext = get_file_extension(image)
@@ -204,6 +199,11 @@ async def on_guild_join(guild):
 @client.event
 async def on_ready():
     PRODUCTION = bool(int(os.getenv('PRODUCTION')))
+    # Get data from jsonbin if data folder doesn't exist (first launch or dyno restart)
+    if not os.path.exists("data"):
+        print("Data folder doesn't exist, getting saved data from jsonbin...")
+        data = get_data_old()
+        replace_all_data(data)
     if PRODUCTION:
         status = "production"
         await client.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name="quoi ?"))
@@ -229,16 +229,7 @@ async def on_message(message):
                 await message.add_reaction("✅")
             if message.content == "majbdd_feur":
                 data = get_data_old()
-                # create data folder if not exists
-                if not os.path.exists("data"):
-                    os.makedirs("data")
-                for server in data:
-                    # create file if not exists
-                    if not os.path.exists(f"data/{server}.json"):
-                        with open(f"data/{server}.json", "w") as f:
-                            f.write("{}")
-                    for user in data[server]:
-                        write_data(server, user, data[server][user])
+                replace_all_data(data)
                 await message.add_reaction("✅")
             if message.content == "backup_feur":
                 backup_data()
@@ -258,5 +249,13 @@ async def on_message(message):
     if allo_in_phonetique(message_phonetique):
         await message.add_reaction(AL)
         await message.add_reaction(HUILE)
+
+def signal_handler(sig, frame):
+    print("Saving data before exiting...")
+    if os.path.exists("data"):
+        backup_data()
+        exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 client.run(TOKEN)
