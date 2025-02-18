@@ -29,7 +29,7 @@ JSONBIN_KEY = os.getenv("JSONBIN_KEY")
 KUURO_ID = 138729016038391808
 DEV_GUILD_ID = 1071519891196223528
 
-def get_data_old():
+async def get_data_old():
     # get data from jsonbin
     # Read data from jsonbin.io
     response = requests.get("https://api.jsonbin.io/v3/b/" + JSONBIN_ID + "/latest", json=None, headers={
@@ -51,8 +51,8 @@ def replace_all_data(data):
                     f.write("{}")
             for user in data[server]:
                 write_data(server, user, data[server][user])
-    except:
-        print("Error while replacing data")
+    except Exception as e:
+        print(f"Error while replacing data: {e}")
         for filename in os.listdir("data"):
             os.remove(f"data/{filename}")
         os.rmdir("data")
@@ -202,7 +202,7 @@ async def on_ready():
     # Get data from jsonbin if data folder doesn't exist (first launch or dyno restart)
     if not os.path.exists("data"):
         print("Data folder doesn't exist, getting saved data from jsonbin...")
-        data = get_data_old()
+        data = await get_data_old()
         replace_all_data(data)
     if PRODUCTION:
         status = "production"
@@ -228,7 +228,7 @@ async def on_message(message):
                 await tree.sync()
                 await message.add_reaction("✅")
             if message.content == "majbdd_feur":
-                data = get_data_old()
+                data = await get_data_old()
                 replace_all_data(data)
                 await message.add_reaction("✅")
             if message.content == "backup_feur":
